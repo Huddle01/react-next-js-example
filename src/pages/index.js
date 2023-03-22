@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 
 import { useEventListener } from '@huddle01/react';
 import { useHuddle01Web } from '@huddle01/react/hooks';
@@ -24,7 +24,7 @@ export default function Home() {
       <div>
         <h1 className="text-6xl font-bold">
           Welcome to{' '}
-          <a className="text-blue-600" href="https://nextjs.org">
+          <a className="text-blue-600" href="https://huddle01.com">
             Huddle01 SDK!
           </a>
         </h1>
