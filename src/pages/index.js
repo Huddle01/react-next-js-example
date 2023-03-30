@@ -1,23 +1,50 @@
 import React, { useRef } from 'react';
 
-import { useEventListener } from '@huddle01/react';
-import { useHuddle01Web } from '@huddle01/react/hooks';
+import { useEventListener, useHuddle01 } from '@huddle01/react';
+import { Audio, Video } from '@huddle01/react/components';
+/* Uncomment to see the Xstate Inspector */
+// import { Inspect } from '@huddle01/react/components';
+
+import {
+  useAudio,
+  useLobby,
+  useMeetingMachine,
+  usePeers,
+  useRoom,
+  useVideo,
+} from '@huddle01/react/hooks';
 
 import Button from '../components/Button';
-import SendButton from '../components/SendButton';
-import Video from '../components/Video';
 
 export default function Home() {
   const videoRef = useRef(null);
 
-  const { state, send } = useHuddle01Web();
+  const { state, send } = useMeetingMachine();
   // Event Listner
-  useEventListener(state, 'JoinedLobby.Cam.On', () => {
+  useEventListener('lobby:cam-on', () => {
     if (state.context.camStream && videoRef.current)
       videoRef.current.srcObject = state.context.camStream;
   });
 
-  console.log({ consumersIndex: state.context });
+  const { initialize, isInitialized } = useHuddle01();
+  const { joinLobby } = useLobby();
+  const {
+    fetchAudioStream,
+    produceAudio,
+    stopAudioStream,
+    stopProducingAudio,
+    stream: micStream,
+  } = useAudio();
+  const {
+    fetchVideoStream,
+    produceVideo,
+    stopVideoStream,
+    stopProducingVideo,
+    stream: camStream,
+  } = useVideo();
+  const { joinRoom, leaveRoom } = useRoom();
+
+  const { peers } = usePeers();
 
   return (
     <div className="grid grid-cols-2">
@@ -31,6 +58,7 @@ export default function Home() {
 
         <h2 className="text-2xl">Room State</h2>
         <h3>{JSON.stringify(state.value)}</h3>
+
         <h2 className="text-2xl">Me Id</h2>
         <div className="break-words">
           {JSON.stringify(state.context.peerId)}
@@ -39,21 +67,23 @@ export default function Home() {
         <div className="break-words">
           {JSON.stringify(state.context.consumers)}
         </div>
-        <h2 className="text-2xl">Peers</h2>
-        <div className="break-words">{JSON.stringify(state.context.peers)}</div>
+
         <h2 className="text-2xl">Error</h2>
         <div className="break-words text-red-500">
           {JSON.stringify(state.context.error)}
         </div>
-        {/* <h2 className="text-2xl">Peers</h2>
-      <div className="break-words">{JSON.stringify(state.context.peers)}</div>
-      <h2 className="text-2xl">Consumers</h2>
-      <div className="break-words">
-        {JSON.stringify(state.context.consumers)}
-      </div> */}
+        <h2 className="text-2xl">Peers</h2>
+        <div className="break-words">{JSON.stringify(peers)}</div>
+        <h2 className="text-2xl">Consumers</h2>
+        <div className="break-words">
+          {JSON.stringify(state.context.consumers)}
+        </div>
 
         <h2 className="text-3xl text-blue-500 font-extrabold">Idle</h2>
-        <Button disabled={!state.matches('Idle')} onClick={() => send('INIT')}>
+        <Button
+          disabled={!state.matches('Idle')}
+          onClick={() => initialize('INIT')}
+        >
           INIT
         </Button>
 
@@ -61,8 +91,10 @@ export default function Home() {
         <br />
         <h2 className="text-3xl text-red-500 font-extrabold">Initialized</h2>
         <Button
-          disabled={!state.matches('Initialized')}
-          onClick={() => send({ type: 'JOIN_LOBBY', roomId: 'rsi-gfwf-fdn' })}
+          disabled={!joinLobby.isCallable}
+          onClick={() => {
+            joinLobby('bcf-oplk-xyp');
+          }}
         >
           JOIN_LOBBY
         </Button>
@@ -70,79 +102,81 @@ export default function Home() {
         <br />
         <h2 className="text-3xl text-yellow-500 font-extrabold">Lobby</h2>
         <div className="flex gap-4 flex-wrap">
-          {/* <Button onClick={() => send(RESTART)}>RESTART</Button> */}
-          {/* <Button
-          disabled={!state.matches('JoinedLobby')}
-          onClick={() => send('ENABLE_CAM')}
-        >
-          ENABLE_CAM
-        </Button> */}
-          <SendButton
-            disabled={!state.matches('JoinedLobby')}
-            event="ENABLE_CAM"
-          />
-          <SendButton
-            disabled={!state.matches('JoinedLobby')}
-            event={'ENABLE_MIC'}
-          />
-          <SendButton
-            disabled={!state.matches('JoinedLobby')}
-            event={'JOIN_ROOM'}
-          />
+          <Button
+            disabled={!fetchVideoStream.isCallable}
+            onClick={fetchVideoStream}
+          >
+            FETCH_VIDEO_STREAM
+          </Button>
 
           <Button
-            disabled={!state.matches('JoinedLobby')}
+            disabled={!fetchAudioStream.isCallable}
+            onClick={fetchAudioStream}
+          >
+            FETCH_AUDIO_STREAM
+          </Button>
+
+          <Button disabled={!joinRoom.isCallable} onClick={joinRoom}>
+            JOIN_ROOM
+          </Button>
+
+          <Button
+            disabled={!state.matches('Initialized.JoinedLobby')}
             onClick={() => send('LEAVE_LOBBY')}
           >
             LEAVE_LOBBY
           </Button>
-          <SendButton
-            disabled={!state.matches('JoinedLobby')}
-            event={'DISABLE_CAM'}
-          />
-          <SendButton
-            disabled={!state.matches('JoinedLobby')}
-            event={'DISABLE_MIC'}
-          />
+
+          <Button
+            disabled={!stopVideoStream.isCallable}
+            onClick={stopVideoStream}
+          >
+            STOP_VIDEO_STREAM
+          </Button>
+          <Button
+            disabled={!stopAudioStream.isCallable}
+            onClick={stopAudioStream}
+          >
+            STOP_AUDIO_STREAM
+          </Button>
         </div>
         <br />
         <h2 className="text-3xl text-green-600 font-extrabold">Room</h2>
         <div className="flex gap-4 flex-wrap">
           <Button
-            disabled={!state.matches('JoinedRoom')}
-            onClick={() =>
-              send({ type: 'PRODUCE_MIC', stream: state.context.micStream })
-            }
+            disabled={!produceAudio.isCallable}
+            onClick={() => produceAudio(micStream)}
           >
             PRODUCE_MIC
           </Button>
 
           <Button
-            disabled={!state.matches('JoinedRoom')}
-            onClick={() =>
-              send({ type: 'PRODUCE_CAM', stream: state.context.camStream })
-            }
+            disabled={!produceVideo.isCallable}
+            onClick={() => produceVideo(camStream)}
           >
             PRODUCE_CAM
           </Button>
 
-          <SendButton
-            disabled={!state.matches('JoinedRoom')}
-            event={'STOP_PRODUCING_MIC'}
-          />
-
-          <SendButton
-            disabled={!state.matches('JoinedRoom')}
-            event={'STOP_PRODUCING_CAM'}
-          />
-
-          <SendButton
-            disabled={!state.matches('JoinedRoom')}
-            event={'LEAVE_ROOM'}
-          />
+          <Button
+            disabled={!stopProducingAudio.isCallable}
+            onClick={() => stopProducingAudio()}
+          >
+            STOP_PRODUCING_MIC
+          </Button>
 
           <Button
-            disabled={!state.matches('JoinedRoom')}
+            disabled={!stopProducingVideo.isCallable}
+            onClick={() => stopProducingVideo()}
+          >
+            STOP_PRODUCING_CAM
+          </Button>
+
+          <Button disabled={!leaveRoom.isCallable} onClick={leaveRoom}>
+            LEAVE_ROOM
+          </Button>
+
+          <Button
+            disabled={!state.matches('Initialized.JoinedRoom')}
             onClick={() =>
               send({ type: 'START_RECORDING', sourceUrl: 'localhost' })
             }
@@ -150,11 +184,15 @@ export default function Home() {
             START_RECORDING
           </Button>
           <Button
-            disabled={!state.matches('JoinedRoom')}
+            disabled={!state.matches('Initialized.JoinedRoom')}
             onClick={() =>
               send({
                 type: 'START_STREAMING',
-                streamingData: { sourceUrl: 'localhost' },
+                streamingData: {
+                  type: 'youtube',
+                  rtmpEndpoint: 'http://localhost',
+                  sourceUrl: 'localhost',
+                },
               })
             }
           >
@@ -169,18 +207,20 @@ export default function Home() {
         Me Video:
         <video ref={videoRef} autoPlay muted></video>
         <div className="grid grid-cols-4">
-          {Object.keys(state.context.consumers)
-            .filter(
-              consumerId =>
-                state.context.consumers[consumerId] &&
-                state.context.consumers[consumerId].track?.kind === 'video'
-            )
-            .map(consumerId => (
+          {Object.values(peers)
+            .filter(peer => peer.cam)
+            .map(peer => (
               <Video
-                key={consumerId}
-                peerId={state.context.consumers[consumerId].peerId}
-                track={state.context.consumers[consumerId].track}
+                key={peer.peerId}
+                peerId={peer.peerId}
+                track={peer.cam}
+                debug
               />
+            ))}
+          {Object.values(peers)
+            .filter(peer => peer.mic)
+            .map(peer => (
+              <Audio key={peer.peerId} peerId={peer.peerId} track={peer.mic} />
             ))}
         </div>
       </div>
