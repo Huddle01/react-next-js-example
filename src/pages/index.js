@@ -82,7 +82,7 @@ export default function Home() {
         <h2 className="text-3xl text-blue-500 font-extrabold">Idle</h2>
         <Button
           disabled={!state.matches('Idle')}
-          onClick={() => initialize('INIT')}
+          onClick={() => initialize('YOUR_PROJECT_ID')}
         >
           INIT
         </Button>
@@ -93,7 +93,7 @@ export default function Home() {
         <Button
           disabled={!joinLobby.isCallable}
           onClick={() => {
-            joinLobby('bcf-oplk-xyp');
+            joinLobby('YOUR_ROOM_ID');
           }}
         >
           JOIN_LOBBY
@@ -173,30 +173,6 @@ export default function Home() {
 
           <Button disabled={!leaveRoom.isCallable} onClick={leaveRoom}>
             LEAVE_ROOM
-          </Button>
-
-          <Button
-            disabled={!state.matches('Initialized.JoinedRoom')}
-            onClick={() =>
-              send({ type: 'START_RECORDING', sourceUrl: 'localhost' })
-            }
-          >
-            START_RECORDING
-          </Button>
-          <Button
-            disabled={!state.matches('Initialized.JoinedRoom')}
-            onClick={() =>
-              send({
-                type: 'START_STREAMING',
-                streamingData: {
-                  type: 'youtube',
-                  rtmpEndpoint: 'http://localhost',
-                  sourceUrl: 'localhost',
-                },
-              })
-            }
-          >
-            START_STREAMING
           </Button>
         </div>
 
