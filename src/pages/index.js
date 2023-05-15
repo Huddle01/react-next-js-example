@@ -114,7 +114,7 @@ const App = () => {
           placeholder="Your Project Id"
           value={projectId}
           onChange={(e) => setProjectId(e.target.value)}
-          className="border-2 border-gray-300 bg-white h-10 px-5 pr-16 rounded-lg text-sm focus:outline-none mr-2"
+          className="border-2 border-gray-300 h-10 px-5 pr-16 rounded-lg text-sm focus:outline-none mr-2"
         />
         <Button
           disabled={!initialize.isCallable}
@@ -133,14 +133,14 @@ const App = () => {
           placeholder="Your Room Id"
           value={roomId}
           onChange={(e) => setRoomId(e.target.value)}
-          className="border-2 border-gray-300 bg-white h-10 px-5 pr-16 rounded-lg text-sm focus:outline-none mr-2"
+          className="border-2 border-gray-300 h-10 px-5 pr-16 rounded-lg text-sm focus:outline-none mr-2"
         />
         <input
           type="text"
           placeholder="Your Access Token (optional)"
           value={accessToken}
           onChange={(e) => setAccessToken(e.target.value)}
-          className="border-2 border-gray-300 bg-white h-10 px-5 pr-16 rpnounded-lg text-sm focus:outline-none mr-2"
+          className="border-2 border-gray-300 h-10 px-5 pr-16 rpnounded-lg text-sm focus:outline-none mr-2"
         />
         <Button
           disabled={!joinLobby.isCallable}
@@ -160,7 +160,7 @@ const App = () => {
             placeholder="Your Room Id"
             value={displayNameText}
             onChange={(e) => setDisplayNameText(e.target.value)}
-            className="border-2 border-gray-300 bg-white h-10 px-5 pr-16 rounded-lg text-sm focus:outline-none mr-2"
+            className="border-2 border-gray-300 h-10 px-5 pr-16 rounded-lg text-sm focus:outline-none mr-2"
           />
           <Button
             disabled={!setDisplayName.isCallable}
